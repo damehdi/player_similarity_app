@@ -61,5 +61,43 @@ def process_data(df, player, template, metrics_weights, distance_metric ):
     similar_players_df= find_similar_players(player, df, cosine_similarities)
     return similar_players_df
 
+import pandas as pd
 
+def filter_data(df, age_interval, nineties_interval, selected_positions, selected_leagues):
+    """
+    Filter players based on specified criteria.
+
+    Parameters:
+        df (pd.DataFrame): The input DataFrame containing player data.
+        age_interval (tuple): A tuple specifying the age range to filter.
+        nineties_interval (tuple): A tuple specifying the '90s range to filter.
+        selected_positions (list): A list of selected player positions to filter.
+        selected_leagues (list): A list of selected leagues to filter.
+
+    Returns:
+        pd.DataFrame: DataFrame containing filtered players.
+    """
+    age_filter = (df['Âge'] >= age_interval[0]) & (df['Âge'] <= age_interval[1])
+
+    # Filter based on nineties_interval & leagues and positions
+    nineties_filter = (df['90s'] >= nineties_interval[0]) & (df['90s'] <= nineties_interval[1])
+    league_mask = df['League'].str.contains('|'.join(selected_leagues))
+    position_mask = df['Place'].str.contains('|'.join(selected_positions))
+
+    # Combine all filters
+    filtered_df = df[age_filter & nineties_filter & league_mask & position_mask]
+
+    return filtered_df
+
+def convert_data(df):
+    """
+    Convert a DataFrame to CSV format.
+    """
+    return df.to_csv(index=False).encode('utf-8')
+
+def generate_radar_chart_option(data, selected_player, similar_player, selected_features):
+
+    # Filter the DataFrame to get data for the selected player and the most similar player
+    selected_player_data = data[data['Joueur'] == selected_player][selected_features].values[0]
+    similar_player_data = data[data['Joueur'] == similar_player][selected_features].values[0]
 

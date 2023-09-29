@@ -1,7 +1,8 @@
 import pandas as pd 
 import streamlit as st 
 from streamlit_echarts import st_echarts
-from utils import load_data, create_sidebar_widgets
+from utils import load_data, create_sidebar_widgets, filter_data, convert_data, generate_radar_chart_option
+
 def main():
 
     # Loading data 
@@ -55,3 +56,19 @@ def main():
 
     if button:
         similar_players_df= process_data(df, selected_player, template_values, metrics_weights, distance_metric)
+
+    if similar_players_df is not None:
+        filetred_df= filter_data(similar_players_df, age_interval, nineties_interval, selected_positions, selected_leagues)
+        displayed_df= filetred_df[['Joueur', 'Équipe', 'League', 'Âge', '90s', 'Similarity Percentage']].reset_index(drop=True)[:12]
+
+        # Display generated dataframe
+        st.write(f'Most Similar Players to {selected_player}:', displayed_df)
+
+        # Save shortlist in csv format
+        csv = convert_data(filetred_df[:12])
+        st.download_button("Download Shortlist", csv, "shortlist.csv", "text/csv", key='download-csv')
+
+                # Radar chart to visualise selected player and the one most similar to him
+        radar_chart_option = generate_radar_chart_option(df, selected_player, displayed_df['Joueur'][1], metrics)
+        st_echarts(radar_chart_option, height="500px")
+
