@@ -1,7 +1,7 @@
 import pandas as pd 
 import streamlit as st 
 from streamlit_echarts import st_echarts
-from utils import load_data, create_sidebar_widgets, filter_data, convert_data, generate_radar_chart_option
+from utils import load_data, create_sidebar_widgets, filter_data, convert_data, generate_radar_chart_option, process_data, generate_pdf_report
 
 def main():
 
@@ -68,7 +68,12 @@ def main():
         csv = convert_data(filetred_df[:12])
         st.download_button("Download Shortlist", csv, "shortlist.csv", "text/csv", key='download-csv')
 
-                # Radar chart to visualise selected player and the one most similar to him
+        # Save generated list in pdf report
+        report_button= st.button('Download Report')
+        if report_button:
+            generate_pdf_report(selected_player, age_interval, nineties_interval, selected_positions, selected_leagues, similar_players_df)
+
+        # Radar chart to visualise selected player and the one most similar to him
         radar_chart_option = generate_radar_chart_option(df, selected_player, displayed_df['Joueur'][1], metrics)
         st_echarts(radar_chart_option, height="500px")
 
